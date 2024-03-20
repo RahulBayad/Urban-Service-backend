@@ -1,0 +1,17 @@
+const router = require('express').Router()
+const usercontroller = require('./../controller/UserController')
+
+router.post('/user',usercontroller.createdata)
+router.post('/login',usercontroller.loginValidation)
+router.get('/user',usercontroller.getdata)
+router.post('/userByEmail',usercontroller.getdataByEmail)
+router.delete('/user/:id',usercontroller.deletedata)
+router.put('/user/:id',usercontroller.updatedata)
+router.put('/addAddress/:id',usercontroller.addAddress)
+router.put('/editAddress/:id',usercontroller.editAddress)
+router.delete('/removeAddress/:id',usercontroller.deleteAddress)
+router.post('/cart/:id',usercontroller.addToCart)
+router.get('/cart/:id',usercontroller.getCart)
+router.put('/cart/:id',usercontroller.updateQty)
+router.delete('/cart/:id',usercontroller.removeFromCart)
+module.exports = router
