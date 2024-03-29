@@ -115,23 +115,25 @@ const updatedata = async (req,res) =>{
         let obj = {
             email: req.body.email,
             password: req.body.password,
-            address:{
-                fname : req.body.fname,
-                lname : req.body.lname,
-                phone: req.body.phone,
-                country:req.body.country,
-                street:req.body.street,
-                city:req.body.city,
-                state:req.body.state,
-                pincode:req.body.pincode
-            }
         }
+        let address = {
+            fname : req.body.fname,
+            lname : req.body.lname,
+            phone: req.body.phone,
+            country:req.body.country,
+            street:req.body.street,
+            area:req.body.area,
+            city:req.body.city,
+            state:req.body.state,
+            pincode:req.body.pincode
+        }
+        const updatedata = await userModel.updateOne({email : req.params.id},obj)
+        const updateAddress = await userModel.updateOne({email : req.params.id},{$set : {[`address.${req.body.index}`] : address}})
         console.log(obj);
 
-        const updatedata = await userModel.updateOne({email : req.params.id},obj)
         if (updatedata != null) {
             res.status(200).json({
-                message : "User data update successful",
+                message : "User data updated",
                 data : updatedata
             })
         } else {
@@ -157,6 +159,7 @@ const addAddress = async (req,res) =>{
             phone: req.body.phone,
             country:req.body.country,
             street:req.body.street,
+            area:req.body.area,
             city:req.body.city,
             state:req.body.state,
             pincode:req.body.pincode
@@ -290,11 +293,31 @@ const removeFromCart = async(req,res)=>{
                 $pull: { cart: null }
               })
             console.log("unset is",result1)
-            // console.log("pull is",result2)
             res.status(201).json({
                 message:"removed item from cart",   
                 data : result1,
-                // data2 : result2,
+            })
+    
+        } catch (error) {
+            console.log("error is",error)
+            res.status(500).json({
+                message:"Error to remove from cart",
+                data : error
+            })
+        }
+}
+const emptyCart = async(req,res)=>{
+        try {
+            console.log("remove cart request is ",req.body);
+            console.log("id" , req.params.id);
+            
+            const result = await userModel.updateOne({email :req.params.id },{
+                $set: { cart: [] }
+            })
+            console.log("unset is",result)
+            res.status(201).json({
+                message:"Cart Empty",   
+                data : result,
             })
     
         } catch (error) {
@@ -318,6 +341,7 @@ module.exports = {
     updateQty,
     getCart,
     removeFromCart,
+    emptyCart,
     addAddress,
     editAddress,
     deleteAddress

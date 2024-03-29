@@ -8,21 +8,26 @@ const userHistorySchema = new Schema({
         name : String,
         orderId : Number,
         service: [{
-            name:{type:Schema.Types.ObjectId , ref:'Service'},
+            service:{type:Schema.Types.ObjectId , ref:'Service'},
             qty :Number,
             cost : Number
         }],
 
         deliveryAddress: {
+            phone : String,
             street: String,
+            area : String,
             city: String,
             state: String,
-            pincode: Number
+            pincode: Number,
+            country : String
         },
-        discount:String,
+        slotDate : String,
+        slotTime : String,
+        discount:Number,
         totalAmount: Number,
         paymentMode: String,
-        date: String,
+        bookingDate: String,
         status: String
     }]
 

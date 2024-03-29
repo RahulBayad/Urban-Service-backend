@@ -7,13 +7,20 @@ const servProHistorySchema = new Schema({
         service: {type : Schema.Types.ObjectId,ref:'Service'}, 
         
         serviceAddress: {
+            name : String,
+            phone : String,
             street: String,
+            area : String,
             city: String,
             state: String,
-            pincode: Number
+            pincode: Number,
+            country : String
         },
         paymentMode: String,
         date: String,
+        slotDate : String,
+        totalAmount: Number,
+        slotTime : String,
         status: String
     }]
 })

@@ -12,6 +12,7 @@ const userSchema = new Schema({
     phone: { type: String, minlength: 10, maxlength: 10 },
     country : String,
     street: String,
+    area : String,
     city: String,
     state: String,
     pincode: Number
@@ -22,6 +23,7 @@ const userSchema = new Schema({
     name : String , 
     description : [{line:String , _id: String}], 
     fees:Number , 
+    discount : String,
     serviceImageUrl : String ,
     qty : Number
   }],

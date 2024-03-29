@@ -35,20 +35,16 @@ const getdata = async (req, res) => {
   }
 }
 const getdataById = async (req, res) => {
+  console.log("request id",req.params.id);
   try {
-    const getdata = await subcategorymodel.find(req.params.id).populate('Category')
-    // console.log("heloo");
-    console.log("request id",req.params.id);
-    // let getdata = await subcategorymodel.find();
+    let getdata = await subcategorymodel.find();
     let getdata1 = getdata.filter((fnd)=>{
-      console.log("fnd.category",fnd.category);
+      // console.log("fnd.category",fnd.category);
       if(fnd.category == req.params.id){
         return fnd;
       }
     })
-    // console.log("sub",getdata)
-    console.log(getdata1)
-    // const getcategory = await subcategorymodel.find({category : req.params.id});
+    const getcategory = await subcategorymodel.find({category : req.params.id});
     res.status(200).json({
       message : "Data by id Get Successful",
       data : getdata1,
@@ -56,6 +52,7 @@ const getdataById = async (req, res) => {
     })
   
   }catch (error) {
+    console.log("error is ",error)
       res.status(500).json({
         message : "Error to get data",
         data : error ,

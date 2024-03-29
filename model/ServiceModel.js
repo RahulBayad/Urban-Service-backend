@@ -7,7 +7,8 @@ const serviceSchema = new Schema({
     line : String
   }],
   type: { type: Schema.Types.ObjectId,ref: "Type",},
-  fees: {type: Number,required: true,},
+  fees: {type: Number,required: true},
+  discount : {type : Number , default : 0},
   serviceImageUrl:String,
   area: {type: String,max: 50,},
   city: {type: String,max: 20,},

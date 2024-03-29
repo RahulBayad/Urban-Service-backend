@@ -9,6 +9,48 @@ const uploadImage = async (req,res)=>{
     
 }
 
+const addServices = async (req,res)=>{
+    let serviceAlreadyAdded = false
+    try {
+        let obj = {
+            serviceType : req.body.types
+        }
+        let checkService = await serviceproviderModel.findOne({email : req.params.id})
+        // let checkService = await serviceproviderModel.findOne({email : req.params.id}).populate({
+        //     path : "services",
+        //     populate:{
+        //         path:"serviceType"
+        //     }
+        // });
+        checkService.services.map((service)=>{
+            if(service.serviceType.toString() == req.body.types){
+                serviceAlreadyAdded = true
+                return null
+            }
+        })
+        if(serviceAlreadyAdded){
+            res.status(400).json({
+                message:"Service is already added",
+            })
+            return null
+        }
+        let response = await serviceproviderModel.updateOne({email : req.params.id},{
+            $push : {services : obj}
+        })
+        console.log("response",response);
+        res.status(200).json({
+            message:"Service added",
+            data : response
+        })
+    } catch (error) {
+        console.log("response",error);
+        res.status(500).json({
+            message:"error",
+            error : error
+        })
+    }
+}
+
 const createdata = async (req,res) =>{
 
     try {
@@ -51,17 +93,18 @@ const createdata = async (req,res) =>{
             profilePictureUrl : result.secure_url ,
             address: {
                 country :req.body.country ,
+                area:req.body.area ,
                 street:req.body.street ,
                 city: req.body.city,
                 state: req.body.state,
                 pincode: req.body.pincode
             },
-            bankAccount : [{
+            bankAccount : {
                 accountHolder : req.body.accountHolder,
                 accountNumber : req.body.accountNumber,
                 bank : req.body.bank,
                 ifsc : req.body.ifsc
-            }], 
+            }, 
         }
 
         const saveserviceproviderdata = await serviceproviderModel.create(obj);
@@ -106,14 +149,28 @@ const loginValidation = async(req,res)=>{
 
 const getdataById = async(req,res) =>{
     try {
-        const getdata = await serviceproviderModel.findById(req.params.id)
-        console.log(getdata);
+        // const getdata = await serviceproviderModel.findById(req.params.id)
+        const getdata = await serviceproviderModel.findOne({email:req.params.id}).populate({
+            path : 'services',
+            populate :{
+                path : "serviceType",
+                populate :{
+                    path : "subcategory",
+                    populate : {
+                        path: "category"
+                    }
+                }
+            }
+        })
+        console.log("data is",getdata);
+        console.log("types are",getdata.services);
         res.status(200).json({
             message : "Got all service provider Data SuccessFul",
-            data : getdata,
+            data : getdata.services,
             flag : 1
         })
     } catch (error) {
+        console.log("error",error)
         res.status(500).json({
             message : "Error to Get Service Provider data",
             data : error ,
@@ -123,7 +180,7 @@ const getdataById = async(req,res) =>{
 }
 const getdata = async(req,res) =>{
     try {
-        const getdata = await serviceproviderModel.find().populate('role')
+        const getdata = await serviceproviderModel.find().populate('services.serviceType')
         console.log(getdata);
         res.status(200).json({
             message : "Got all service provider Data SuccessFul",
@@ -232,43 +289,61 @@ const updatedata = async(req,res)=>{
     }
 }
 
-const updateNestedData = async (req,res)=>{
-    try {
+// const updateNestedData = async (req,res)=>{
+//     try {
         
-        const updatedata = await serviceproviderModel.findByIdAndUpdate(req.params.id,
-            {
-                $push :{
-                    services : req.body
-                }
-            });
-        console.log(updatedata);
-        if (updatedata != null) {
-            res.status(200).json({
-                message : "data udate Successful",
-                flag : 1
-            })
-        } else {
-            res.status(404).json({
-                message : "Error to find Servie data ",
-                data : error ,
-                falg : -1
-            })
-        }
+//         const updatedata = await serviceproviderModel.findByIdAndUpdate(req.params.id,
+//             {
+//                 $push :{
+//                     services : req.body
+//                 }
+//             });
+//         console.log(updatedata);
+//         if (updatedata != null) {
+//             res.status(200).json({
+//                 message : "data udate Successful",
+//                 flag : 1
+//             })
+//         } else {
+//             res.status(404).json({
+//                 message : "Error to find Servie data ",
+//                 data : error ,
+//                 falg : -1
+//             })
+//         }
+//     } catch (error) {
+//         res.status(500).json({
+//             message : "Error to updatedata",
+//             data : error ,
+//             falg : -1
+//         })
+//     }
+// }
+
+const getTypes = async(req,res)=>{
+    try {
+
+        let types = await serviceproviderModel.find({email : req.params.id})
+        console.log("data is......",types)
+        console.log("types are......",types.services)
+        
     } catch (error) {
         res.status(500).json({
-            message : "Error to updatedata",
+            message:"Error to get types",
             data : error ,
-            falg : -1
+            flag : -1
         })
     }
 }
+
 module.exports = {
     loginValidation,
     uploadImage,
     createdata,
+    addServices,
     getdata,
     getdataById,
     deletedata,
     updatedata,
-    updateNestedData
+    getTypes
 }

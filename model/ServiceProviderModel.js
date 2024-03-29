@@ -21,16 +21,17 @@ const serviceproviderSchema = new Schema({
   address: {
     country : { type: String, required: true},
     street: { type: String, required: true},
+    area: { type: String, required: true},
     city: { type: String, required: true},
     state: { type: String, required: true},
     pincode: { type: String, required: true}
   },
-  bankAccount : [{
+  bankAccount : {
     accountHolder : {type : String,required : true},
     accountNumber : {type : String,required : true},
     bank : {type : String,required : true},
     ifsc : {type : String,required : true}
-  }], 
+  }, 
   services : [{
     serviceType:{type : Schema.Types.ObjectId,ref:'Type'},
     email : String,

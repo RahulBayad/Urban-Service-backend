@@ -13,5 +13,6 @@ router.delete('/removeAddress/:id',usercontroller.deleteAddress)
 router.post('/cart/:id',usercontroller.addToCart)
 router.get('/cart/:id',usercontroller.getCart)
 router.put('/cart/:id',usercontroller.updateQty)
+router.put('/cart/emptyCart/:id',usercontroller.emptyCart)
 router.delete('/cart/:id',usercontroller.removeFromCart)
 module.exports = router
