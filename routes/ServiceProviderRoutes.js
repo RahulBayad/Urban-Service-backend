@@ -7,9 +7,10 @@ router.post('/serviceprovider',multerF.upload, serviceprovidcontroller.createdat
 router.get('/serviceprovider',serviceprovidcontroller.getdata)
 router.put('/addService/:id',serviceprovidcontroller.addServices)
 router.post('/login',serviceprovidcontroller.loginValidation)
+router.get('/fetchServiceRequests/:email',serviceprovidcontroller.fetchServiceRequests)
 router.get('/serviceprovider/:id',serviceprovidcontroller.getdataById)
 router.delete('/serviceprovider/:id',serviceprovidcontroller.deletedata)
 router.put('/serviceprovider/:id',serviceprovidcontroller.updatedata)
 // router.get('/getTypes/:id',serviceprovidcontroller.getTypes)
-// router.put('/addservice/:id', serviceprovidcontroller.updateNestedData)
+router.put('/deleteService/:id', serviceprovidcontroller.deleteService)
 module.exports = router

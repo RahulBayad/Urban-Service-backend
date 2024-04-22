@@ -1,4 +1,5 @@
 const serviceproviderModel = require('../model/ServiceProviderModel')
+const userHistoryModel = require("./../model/UserHistoryModel")
 const cloudinary = require('./../util/imageUpload')
 // const fileUpload = require('./../util/imageUpload')
 
@@ -289,36 +290,45 @@ const updatedata = async(req,res)=>{
     }
 }
 
-// const updateNestedData = async (req,res)=>{
-//     try {
-        
-//         const updatedata = await serviceproviderModel.findByIdAndUpdate(req.params.id,
-//             {
-//                 $push :{
-//                     services : req.body
-//                 }
-//             });
-//         console.log(updatedata);
-//         if (updatedata != null) {
-//             res.status(200).json({
-//                 message : "data udate Successful",
-//                 flag : 1
-//             })
-//         } else {
-//             res.status(404).json({
-//                 message : "Error to find Servie data ",
-//                 data : error ,
-//                 falg : -1
-//             })
-//         }
-//     } catch (error) {
-//         res.status(500).json({
-//             message : "Error to updatedata",
-//             data : error ,
-//             falg : -1
-//         })
-//     }
-// }
+const deleteService = async (req,res)=>{
+    try {
+        const index = req.body.index;
+        const updatedata = await serviceproviderModel.updateOne({email : req.params.id},
+            {
+                $unset :{
+                    [`services.${index}`] : 1
+                }
+            });
+        const removeNull = await serviceproviderModel.updateOne({email : req.params.id},
+            {
+                $pull :{
+                    services : null
+                }
+            });
+        console.log("update data",updatedata);
+        console.log("remove null", removeNull);
+        if (updatedata != null) {
+            res.status(200).json({
+                message : "data udate Successful",
+                data : removeNull,
+                flag : 1
+            })
+        } else {
+            res.status(404).json({
+                message : "Error to find Servie data ",
+                data : error ,
+                falg : -1
+            })
+        }
+    } catch (error) {
+        console.log("error",error)
+        res.status(500).json({
+            message : "Error to updatedata",
+            data : error ,
+            falg : -1
+        })
+    }
+}
 
 const getTypes = async(req,res)=>{
     try {
@@ -336,6 +346,54 @@ const getTypes = async(req,res)=>{
     }
 }
 
+const fetchServiceRequests = async(req,res)=>{
+    try {
+        
+        let employee = await serviceproviderModel.findOne({email : req.params.email})
+        // console.log("service array ",employee)
+        let serviceArray = [];
+        employee.services.map((service)=>{
+            serviceArray.push(service.serviceType.toString())
+        })
+        console.log("service array ",serviceArray)
+        
+        let result = await userHistoryModel.find(
+            { 
+                'history.status': 'Pending', 
+                'history.service.type': { $in: serviceArray } 
+            }
+        ).populate('history.service.service')
+        let serviceRequests = [];
+        let filterServiceArr = [];
+        result.map((result)=>{
+            result.history.map(async(request)=>{
+                if(request.status == "Pending"){
+                    request.service.map((serv)=>{
+                        console.log("type is ",serv.type)
+                        if(serviceArray.includes(serv.type)){
+                            filterServiceArr.push(serv)
+                        }
+                    })
+                    if(filterServiceArr.length != 0){
+                        request.service = filterServiceArr
+                        serviceRequests.push(request)
+                        console.log("request",serviceRequests)
+                        filterServiceArr = []
+                    }
+                }
+            })  
+        })
+        res.json({
+            data : serviceRequests
+        })
+        console.log("result is ",result)
+
+
+    } catch (error) {
+        console.log("error",error)
+    }
+}
+
 module.exports = {
     loginValidation,
     uploadImage,
@@ -345,5 +403,7 @@ module.exports = {
     getdataById,
     deletedata,
     updatedata,
-    getTypes
+    getTypes,
+    deleteService,
+    fetchServiceRequests    
 }

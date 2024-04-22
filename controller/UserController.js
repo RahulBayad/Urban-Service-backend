@@ -153,6 +153,7 @@ const updatedata = async (req,res) =>{
 
 const addAddress = async (req,res) =>{
     try {
+        console.log("formdata",req.body)
         let obj = {
             fname : req.body.fname,
             lname : req.body.lname,
@@ -225,10 +226,18 @@ const deleteAddress = async (req,res)=>{
     }
 }
 
+
 const addToCart = async(req,res)=>{
     try {
-        req.body.qty = 1
-        const result = await userModel.updateOne({email :req.params.id }, {$push :{cart : req.body }})
+        console.log("req.body" , req.body)
+        const {type , ...cartItem} = req.body
+        cartItem.serviceId = req.body._id
+        cartItem.type = type._id
+        cartItem.qty = 1
+        console.log("req.body" , cartItem)
+        const result = await userModel.updateOne({email :req.params.id }, {
+            $push :{cart : cartItem }
+        })
         console.log("result is",result)
         res.status(201).json({
             message:"service added to cart",
@@ -248,6 +257,7 @@ const getCart = async(req,res)=>{
     try {
         // req.body.qty = 1
         const result = await userModel.find({email : req.params.id})
+        console.log("result cart 1 is",result)
         console.log("result cart is",result[0].cart)
 
         res.status(200).json({

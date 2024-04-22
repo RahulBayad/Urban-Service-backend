@@ -17,16 +17,17 @@ const userSchema = new Schema({
     state: String,
     pincode: Number
   }],
-  
   cart :[{
-    _id: Schema.Types.ObjectId,
-    name : String , 
-    description : [{line:String , _id: String}], 
-    fees:Number , 
-    discount : String,
-    serviceImageUrl : String ,
-    qty : Number
-  }],
+      serviceId: {type:Schema.Types.ObjectId , ref : 'Service'},
+      name : String , 
+      description : [{line:String , _id: String}],
+      type :{type : String}, 
+      fees:Number , 
+      discount : Number,
+      serviceImageUrl : String ,
+      qty : Number
+    }],
+   
 });
 
 module.exports = mongoose.model("User", userSchema);

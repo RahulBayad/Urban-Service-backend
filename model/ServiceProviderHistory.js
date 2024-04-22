@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const servProHistorySchema = new Schema({
-    servPro : {type : Schema.Types.ObjectId , ref : 'ServiceProvider'},
+    servPro : String,
     history : [{
         service: {type : Schema.Types.ObjectId,ref:'Service'}, 
         

@@ -9,6 +9,7 @@ const userHistorySchema = new Schema({
         orderId : Number,
         service: [{
             service:{type:Schema.Types.ObjectId , ref:'Service'},
+            type : {type : String},
             qty :Number,
             cost : Number
         }],
@@ -28,7 +29,8 @@ const userHistorySchema = new Schema({
         totalAmount: Number,
         paymentMode: String,
         bookingDate: String,
-        status: String
+        status: String,
+        email : String
     }]
 
 })

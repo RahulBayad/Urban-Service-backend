@@ -6,6 +6,7 @@ const addOrder = async (req,res)=>{
         req.body.service.map((service)=>{
             let obj = {
                 service : service._id,
+                type : service.type,
                 qty : service.qty,
                 cost : service.fees
             }  
@@ -20,7 +21,9 @@ const addOrder = async (req,res)=>{
                 orderId : req.body.orderId,
                 service: services,
                 deliveryAddress: {
+                    phone: req.body.address.phone,
                     street: req.body.address.street,
+                    area: req.body.address.area,
                     city: req.body.address.city,
                     state: req.body.address.state,
                     pincode: req.body.address.pincode
@@ -31,7 +34,8 @@ const addOrder = async (req,res)=>{
                 totalAmount: req.body.totalAmount,
                 paymentMode: req.body.paymentType,
                 bookingDate: req.body.bookingDate,
-                status: req.body.status
+                status: req.body.status,
+                email : req.body.email
             }]
         }
         if(checkUser.length > 0){
@@ -122,10 +126,34 @@ const updateOrderStatus = async (req,res)=>{
     }
 }
 
+const cancelOrder = async (req,res) =>{
+    try{
+        // console.log("order ",req.body)
+
+        let cancellation = await UserHistoryModel.updateOne({email : req.params.email ,'history._id':req.body._id},{
+            $set : {
+                'history.$.status' : "Cancelled"
+            }
+        })
+
+        console.log("order cancelled success",cancellation)
+        res.status(200).json({
+            message : "Order Cancelled",
+            data : cancellation
+        })
+        
+    }catch(err){
+        res.status(400).json({
+            message : "Error in cancellation",
+            data : err
+        })
+    }
+}
 module.exports = {
     addOrder,
     getUserHistory,
     getUserHistoryById,
-    updateOrderStatus
+    updateOrderStatus,
+    cancelOrder
 }
 
