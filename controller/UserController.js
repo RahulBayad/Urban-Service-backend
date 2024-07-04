@@ -1,4 +1,145 @@
 const userModel = require('../model/UserModel')
+const OTP = require("../util/otp.js")
+const mailer = require("../util/mail.js")
+
+
+const checkEmailIsValid = async (req,res)=>{
+    try {
+        const email = req.params.email
+        console.log("email",email)
+        if(!email){ 
+            return res.status(400).json({
+                message : "Enter your email address",
+                flag : false
+            })
+        }
+        const user = await userModel.findOne({email})
+        if(user){
+            return res.status(200).json({
+                message : "Email is valid",
+                data : user,
+                flag : true
+            })
+        }else{
+            return res.status(400).json({
+                message : "Email is not valid",
+                flag : false
+            })
+        }
+        
+    } catch (error) {
+        console.log("error",error)
+        res.status(500).json({
+            message : "Error in email checking at server side",
+            data : error,
+            flag : -1
+        })
+    }
+}
+
+const generateOTP = async (req,res) => {
+    try {
+        console.log("otp request came")
+        const otp = await OTP.generateOTP();
+        console.log("otp is ",otp)
+
+        if(otp){
+            const email = req.params.email
+            console.log("otp email is",email);
+            const mailOptions = {
+                from : "Urban Service <no-reply@urbanService.com>",
+                to : email,
+                subject : "OTP verification",
+                html : "Your OTP (One time password) for reset your password is <b>"+otp+"</b> valid for only 120 seconds \n."+ 
+                "<br/>"+
+                "<p>Note : \n This is auto-generated email. Do not reply to it."+
+                "\n This website just for education purpose.</p>"
+            }
+            const sendEmail = await mailer.sendEmail(email, mailOptions, otp)
+            console.log("mail sent")
+
+            if(!sendEmail){
+                return res.status(400).json({
+                    message : "Email not sent",
+                    flag : -1
+                })
+            }
+            return res.status(200).json({
+                message : "OTP generated successfully",
+                data : sendEmail,
+                flag : 1
+            })
+        }else{
+            return res.status(400).json({
+                message : "Error in generating OTP",
+                flag : -1
+            })
+        }
+
+    } catch (error) {
+        console.log("error",error)
+        res.status(500).json({
+            message : "Error in OTP generation",
+            data : error,
+            flag : -1
+        })
+    }
+}
+
+const forgetPassword = async(req,res) =>{
+    try {
+        if(!req.body){
+            return res.status(400).json({
+                message : "Please enter all the details",
+            })
+        }else{
+            const {email} = req.params
+            const {password} = req.body
+            const {cnfPassword} = req.body
+            const userOtp = req.body.otp
+
+            if(password !== cnfPassword){
+                return res.status(400)/json({
+                    message : "Password and repeated password should be same",
+                    flag : -1
+                })
+            }
+            const otp = await OTP.generateOTP();
+            console.log("user OTP :",userOtp," and generated otp ",otp);
+            if(parseInt(otp) !== parseInt(userOtp)){
+                return res.status(400).json({
+                    message : "OTP is not correct",
+                    flag : -1
+                })
+            }
+
+            const user = await userModel.findOneAndUpdate({email},{
+                $set : {
+                    password : password
+                }
+            })
+            if(!user){
+                return res.status(400).json({
+                    message : "User not found",
+                    flag : -1
+                })
+            }
+            return res.status(200).json({
+                message : "Password updated successfully",
+                flag : 1
+            })
+        }    
+        
+    } catch (error) {
+        console.log("error",error)
+        return res.status(500).json({
+            message : "Error during changing password",
+            data : error,
+            flag : -1
+        })
+    }
+
+}
 
 const createdata = async (req,res)=>{
     try {
@@ -58,6 +199,7 @@ const getdata = async (req,res)=>{
             flag : 1
         })
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             message : "Error to get all user data",
             data : error ,
@@ -257,8 +399,8 @@ const getCart = async(req,res)=>{
     try {
         // req.body.qty = 1
         const result = await userModel.find({email : req.params.id})
-        console.log("result cart 1 is",result)
-        console.log("result cart is",result[0].cart)
+        // console.log("result cart 1 is",result)
+        // console.log("result cart is",result[0].cart)
 
         res.status(200).json({
             message:"cart fetched",
@@ -278,7 +420,7 @@ const updateQty = async(req,res)=>{
     try {
         console.log("body is ",req.body);
         const result = await userModel.updateOne({email :req.params.id }, { $set: { [`cart.${req.body.index}`]: req.body.service } })
-        console.log("result is",result)
+        // console.log("result is",result)
         res.status(201).json({
             message:"service added to cart",
             data : result
@@ -302,7 +444,7 @@ const removeFromCart = async(req,res)=>{
             const result2 = await userModel.updateOne({email :req.params.id },{
                 $pull: { cart: null }
               })
-            console.log("unset is",result1)
+            // console.log("unset is",result1)
             res.status(201).json({
                 message:"removed item from cart",   
                 data : result1,
@@ -341,6 +483,9 @@ const emptyCart = async(req,res)=>{
 
 
 module.exports = {
+    checkEmailIsValid,
+    generateOTP,
+    forgetPassword,
     loginValidation,
     createdata,
     getdata,

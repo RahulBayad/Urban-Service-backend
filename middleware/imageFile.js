@@ -12,10 +12,8 @@ const upload = multer({
 }).single('image');
 
 const uploadImage = async (req,res)=>{
-
     console.log(req.body)
     console.log(req.file)
-    
 }
 
 module.exports = {

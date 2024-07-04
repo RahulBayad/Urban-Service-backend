@@ -3,6 +3,8 @@ const servProHistoryController = require('./../controller/ServProHistoryControll
 
 router.post('/addservice/:email',servProHistoryController.addOrder)
 router.get('/servprohistory',servProHistoryController.getServProHistory)
-router.get('/servprohistory/:id',servProHistoryController.getServProHistoryById)
+router.get('/servprohistory/:email',servProHistoryController.getServProHistoryById)
 router.put('/service/:id',servProHistoryController.updateServiceStatus)
+router.put('/cancelOrder/:email',servProHistoryController.cancelOrder)
+router.put('/completeOrder/:email',servProHistoryController.completeOrder)
 module.exports = router

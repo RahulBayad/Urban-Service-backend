@@ -4,7 +4,12 @@ const Schema = mongoose.Schema;
 const servProHistorySchema = new Schema({
     servPro : String,
     history : [{
-        service: {type : Schema.Types.ObjectId,ref:'Service'}, 
+        services : [{
+            service: {type : Schema.Types.ObjectId,ref:'Service'}, 
+            type: {type : Schema.Types.ObjectId,ref:'Type'}, 
+            qty : Number,
+            cost : Number,
+        }],
         
         serviceAddress: {
             name : String,
@@ -17,7 +22,7 @@ const servProHistorySchema = new Schema({
             country : String
         },
         paymentMode: String,
-        date: String,
+        bookingDate: String,
         slotDate : String,
         totalAmount: Number,
         slotTime : String,

@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors')
+require('dotenv').config()
 const app = express();
 const PORT = 4001;
 
@@ -9,7 +10,7 @@ const PORT = 4001;
 const db = mongoose.connect("mongodb+srv://rahulbayad05:Rahul%400508@cluster0.oipkibr.mongodb.net/urbanservice")
 db.then(()=>{
     console.log("connected to mongodb")
-}).catch((err)=>{
+}).catch((err)=>{   
     console.log(err)
 })
 

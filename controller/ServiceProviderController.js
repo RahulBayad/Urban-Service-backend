@@ -164,6 +164,37 @@ const getdataById = async(req,res) =>{
             }
         })
         console.log("data is",getdata);
+        // console.log("types are",getdata.services);
+        res.status(200).json({
+            message : "Got all service provider Data SuccessFul",
+            data : getdata,
+            flag : 1
+        })
+    } catch (error) {
+        console.log("error",error)
+        res.status(500).json({
+            message : "Error to Get Service Provider data",
+            data : error ,
+            flag : -1 
+        })
+    }
+}
+const getServicesById = async(req,res) =>{
+    try {
+        // const getdata = await serviceproviderModel.findById(req.params.id)
+        const getdata = await serviceproviderModel.findOne({email:req.params.id}).populate({
+            path : 'services',
+            populate :{
+                path : "serviceType",
+                populate :{
+                    path : "subcategory",
+                    populate : {
+                        path: "category"
+                    }
+                }
+            }
+        })
+        console.log("data is",getdata);
         console.log("types are",getdata.services);
         res.status(200).json({
             message : "Got all service provider Data SuccessFul",
@@ -405,5 +436,6 @@ module.exports = {
     updatedata,
     getTypes,
     deleteService,
+    getServicesById,
     fetchServiceRequests    
 }

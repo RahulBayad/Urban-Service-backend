@@ -15,4 +15,7 @@ router.get('/cart/:id',usercontroller.getCart)
 router.put('/cart/:id',usercontroller.updateQty)
 router.put('/cart/emptyCart/:id',usercontroller.emptyCart)
 router.delete('/cart/:id',usercontroller.removeFromCart)
+router.patch('/forgetPassword/:email',usercontroller.forgetPassword)
+router.get('/checkEmail/:email',usercontroller.checkEmailIsValid)
+router.get('/getOTP/:email',usercontroller.generateOTP)
 module.exports = router
