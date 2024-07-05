@@ -1,7 +1,7 @@
 const userModel = require('../model/UserModel')
-const OTP = require("../util/otp.js")
 const mailer = require("../util/mail.js")
-
+const OTP = require("../util/otp.js")
+const jwt = require("jsonwebtoken")
 
 const checkEmailIsValid = async (req,res)=>{
     try {
@@ -39,13 +39,11 @@ const checkEmailIsValid = async (req,res)=>{
 
 const generateOTP = async (req,res) => {
     try {
-        console.log("otp request came")
-        const otp = await OTP.generateOTP();
+        const otp = OTP.generateOTP();
         console.log("otp is ",otp)
 
         if(otp){
             const email = req.params.email
-            console.log("otp email is",email);
             const mailOptions = {
                 from : "Urban Service <no-reply@urbanService.com>",
                 to : email,
@@ -104,7 +102,7 @@ const forgetPassword = async(req,res) =>{
                     flag : -1
                 })
             }
-            const otp = await OTP.generateOTP();
+            const otp = OTP.generateOTP();
             console.log("user OTP :",userOtp," and generated otp ",otp);
             if(parseInt(otp) !== parseInt(userOtp)){
                 return res.status(400).json({

@@ -1,13 +1,12 @@
-// import { TOTP } from "totp-generator"
-const TOTP = require("totp-generator");
 
-const generateOTP = async ()=>{
-	const {otp}  = await TOTP.TOTP.generate("JBSWY3DPEHPK3PXP", {
-		digits: 6,
-		algorithm: "SHA-512",
-		period: 120,
-	})
-	return otp;
+const generateOTP = ()=>{
+	let str = '0123456789'
+	let otp = ''
+	for(let i=0;i<6;i++){
+		let index = Math.floor(Math.random()*str.length)
+		otp += str[index]
+	}
+	return otp
 }
 
 module.exports = {generateOTP}

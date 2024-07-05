@@ -7,7 +7,7 @@ const PORT = 4001;
 
 // const db = mongoose.connect("mongodb://127.0.0.1/urbanservice");
 
-const db = mongoose.connect("mongodb+srv://rahulbayad05:Rahul%400508@cluster0.oipkibr.mongodb.net/urbanservice")
+const db = mongoose.connect(process.env.MONGODB_URI)
 db.then(()=>{
     console.log("connected to mongodb")
 }).catch((err)=>{   
