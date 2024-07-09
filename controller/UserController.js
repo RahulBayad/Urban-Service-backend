@@ -1,4 +1,5 @@
-const userModel = require('../model/UserModel')
+const userModel = require('../model/UserModel.js')
+const userOtpModel = require("../model/UserOtpModel.js")
 const mailer = require("../util/mail.js")
 const OTP = require("../util/otp.js")
 const jwt = require("jsonwebtoken")
@@ -39,11 +40,48 @@ const checkEmailIsValid = async (req,res)=>{
 
 const generateOTP = async (req,res) => {
     try {
+        const email = req.params.email
         const otp = OTP.generateOTP();
-        console.log("otp is ",otp)
 
-        if(otp){
-            const email = req.params.email
+        if(!otp){
+            return res.status(400).json({
+                message : "Error in generating OTP",
+                flag : -1
+            })
+        }
+        
+        const otpToken = await jwt.sign(
+            {
+                otp : otp,
+            },
+            process.env.OTP_SECRET,
+            {
+                expiresIn : process.env.OTP_EXPIRY_TIME 
+            }
+        )
+        console.log("otp token is",otpToken)
+        
+        if(!otpToken){
+            return res.status(400).json({
+                message : "Error in generating OTP token",
+                flag : false
+            })
+        }
+
+        const checkEmailIsAvailable = await userOtpModel.findOne({email : email})
+
+        if(checkEmailIsAvailable){
+
+            let otpUpdation = await userOtpModel.updateOne({email : email}, {$set : {otp : otpToken}});
+            console.log("updating otp ", otpUpdation);
+
+        }else{
+
+            const saveOtp = await userOtpModel.create({email : email, otp : otpToken})
+            console.log("save otp is",saveOtp)
+            
+        }
+
             const mailOptions = {
                 from : "Urban Service <no-reply@urbanService.com>",
                 to : email,
@@ -62,17 +100,13 @@ const generateOTP = async (req,res) => {
                     flag : -1
                 })
             }
+            
             return res.status(200).json({
                 message : "OTP generated successfully",
                 data : sendEmail,
                 flag : 1
             })
-        }else{
-            return res.status(400).json({
-                message : "Error in generating OTP",
-                flag : -1
-            })
-        }
+        
 
     } catch (error) {
         console.log("error",error)
@@ -97,20 +131,55 @@ const forgetPassword = async(req,res) =>{
             const userOtp = req.body.otp
 
             if(password !== cnfPassword){
-                return res.status(400)/json({
+                return res.status(400).json({
                     message : "Password and repeated password should be same",
                     flag : -1
                 })
             }
-            const otp = OTP.generateOTP();
-            console.log("user OTP :",userOtp," and generated otp ",otp);
-            if(parseInt(otp) !== parseInt(userOtp)){
+
+            const getOtp = await userOtpModel.findOne({email});
+            if(!getOtp){
                 return res.status(400).json({
-                    message : "OTP is not correct",
-                    flag : -1
+                    message : "OTP not found in db",
+                    flag : false
                 })
             }
+            try {
+                const decryptedOtp = await jwt.verify(getOtp.otp, process.env.OTP_SECRET);
+                console.log("decryptedOtp",decryptedOtp)
+                if(!decryptedOtp){
+                    return res.status(400).json({
+                        message : "OTP not found",
+                        flag : false
+                    })
+                }
+                console.log("user OTP :",userOtp," and generated otp ",decryptedOtp);
+                if(parseInt(decryptedOtp.otp) !== parseInt(userOtp)){
+                    return res.status(400).json({
+                        message : "OTP is not correct",
+                        flag : -1
+                    })
+                }
+            } catch (error) {
+                console.log("error",error)
+                
+                if(error.message === "jwt expired"){
+                    return res.status(400).json({
+                        message : "OTP expired",
+                        flag : false
+                    })
+                }
+                return res.status(400).json({
+                    message : "error in otp verification",
+                    data : error,
+                    flag : false
+                })
 
+            }
+
+            
+            const deleteOtp = await userOtpModel.deleteOne({email});
+            
             const user = await userModel.findOneAndUpdate({email},{
                 $set : {
                     password : password
